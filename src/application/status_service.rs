@@ -9,7 +9,9 @@ impl StatusService {
 
     pub fn get_status(&self) -> ApiStatus {
         ApiStatus {
+            status: "ok".to_string(),
             message: "API is running".to_string(),
+            status_code: 200,
         }
     }
 }

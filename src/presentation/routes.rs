@@ -1,12 +1,26 @@
 use axum::{routing::get, Router};
 use tower_http::trace::TraceLayer;
+use sqlx::PgPool;
 
-use crate::presentation::handlers::{health::health_check, status::api_status};
+use crate::application::user_service::UserService;
+use crate::presentation::handlers::{health::health_check, status::api_status, user::get_user_info};
 
-pub fn create_router() -> Router {
+/// ルーターを作成
+/// 
+/// # 引数
+/// - `pool`: データベース接続プール
+/// 
+/// # 戻り値
+/// - `Router`: Axumルーター
+pub async fn create_router(pool: PgPool) -> Router {
+    // ユーザーサービスを作成
+    let user_service = UserService::new(pool);
+
     Router::new()
         .route("/api/v1/status", get(api_status))
         .route("/api/v1/health", get(health_check))
+        .route("/api/v1/users/{user_id}", get(get_user_info))
+        .with_state(user_service)  // ステートとしてUserServiceを渡す
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(|request: &axum::http::Request<_>| {
