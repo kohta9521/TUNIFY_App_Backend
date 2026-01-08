@@ -6,15 +6,21 @@ use crate::domains::status::ApiStatus;
 
 #[derive(Serialize)]
 pub struct StatusResponse {
+    status: String,
     message: String,
+    status_code: u16,
 }
 
 pub async fn api_status() -> Json<StatusResponse> {
     tracing::debug!("Handling /api/v1/status request");
     
     let service = StatusService::new();
-    let ApiStatus { message } = service.get_status();
+    let ApiStatus { status, message, status_code } = service.get_status();
     
-    tracing::debug!("Status response: {}", message);
-    Json(StatusResponse { message })
+    tracing::debug!("Status response: {} (code: {})", message, status_code);
+    Json(StatusResponse { 
+        status, 
+        message, 
+        status_code 
+    })
 }
